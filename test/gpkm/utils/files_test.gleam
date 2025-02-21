@@ -1,5 +1,5 @@
 import gleeunit/should
-import utils/files
+import gpkm/utils/files
 
 pub fn read_file_as_str_test() {
   let path_to_b64_pkm = "misc/chimchar_fr.pkm.b64"

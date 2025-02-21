@@ -1,7 +1,7 @@
 import gleam/int
 import gleam/list
 import gleam/result
-import utils/bytes.{type Bytes}
+import gpkm/utils/bytes.{type Bytes}
 
 pub type Action {
   Encrypt

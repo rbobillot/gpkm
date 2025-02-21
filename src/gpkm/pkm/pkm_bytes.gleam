@@ -3,10 +3,10 @@ import gleam/int
 import gleam/list
 import gleam/result
 import gleam/string
-import pkm/lookup_tables/game_chars
-import pkm/lookup_tables/lookup
-import pkm/lookup_tables/pokemon_info
-import utils/bytes.{type Bytes}
+import gpkm/pkm/lookup_tables/game_chars
+import gpkm/pkm/lookup_tables/lookup
+import gpkm/pkm/lookup_tables/pokemon_info
+import gpkm/utils/bytes.{type Bytes}
 
 pub type Encoding {
   Bin

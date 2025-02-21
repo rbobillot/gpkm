@@ -2,10 +2,10 @@ import gleam/bit_array
 import gleam/list
 import gleam/result
 import gleam/string
-import pkm/pkm_builder.{type Pkm} as pkm
-import pkm/pkm_bytes.{type EncryptedDataType, B64, Bin, PkmBits, PkmFile}
-import utils/bytes.{type Bytes}
-import utils/files
+import gpkm/pkm/pkm_builder.{type Pkm} as pkm
+import gpkm/pkm/pkm_bytes.{type EncryptedDataType, B64, Bin, PkmBits, PkmFile}
+import gpkm/utils/bytes.{type Bytes}
+import gpkm/utils/files
 
 pub type Errors {
   InvalidSize(dt: EncryptedDataType)

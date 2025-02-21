@@ -2,11 +2,11 @@ import gleam/dict
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
-import pkm/lookup_tables/game_info
-import pkm/lookup_tables/lookup
-import pkm/lookup_tables/pokemon_info
-import pkm/pkm_bytes
-import utils/bytes.{type Bytes}
+import gpkm/pkm/lookup_tables/game_info
+import gpkm/pkm/lookup_tables/lookup
+import gpkm/pkm/lookup_tables/pokemon_info
+import gpkm/pkm/pkm_bytes
+import gpkm/utils/bytes.{type Bytes}
 
 pub type Pkm {
   Pkm(

@@ -2,14 +2,14 @@ import gleam/bit_array
 import gleam/option.{Some}
 import gleam/result
 import gleeunit/should
-import pkm/pkm_builder
-import pkm/pkm_bytes.{
+import gpkm/pkm/pkm_builder
+import gpkm/pkm/pkm_bytes.{
   B64, EffortValues, HiddenPower, IndividualValues, Move, Moves, PkmBits,
 }
-import pkm/ser_de
-import sav/decrypt
-import utils/bytes
-import utils/files
+import gpkm/pkm/ser_de
+import gpkm/sav/decrypt
+import gpkm/utils/bytes
+import gpkm/utils/files
 
 const chimchar_fr_pkm_file_path_sav = "misc/chimchar_fr.pkm.sav"
 

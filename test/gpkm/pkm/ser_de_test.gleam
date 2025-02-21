@@ -1,9 +1,11 @@
 import gleam/bit_array
 import gleam/option.{Some}
 import gleeunit/should
-import pkm/pkm_builder
-import pkm/pkm_bytes.{EffortValues, HiddenPower, IndividualValues, Move, Moves}
-import pkm/ser_de
+import gpkm/pkm/pkm_builder
+import gpkm/pkm/pkm_bytes.{
+  EffortValues, HiddenPower, IndividualValues, Move, Moves,
+}
+import gpkm/pkm/ser_de
 
 const chimchar_fr_pkm_file_path = "misc/chimchar_fr.pkm"
 

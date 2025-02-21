@@ -1,5 +1,5 @@
 import gleeunit/should
-import utils/bytes
+import gpkm/utils/bytes
 
 const empty_bytes = []
 

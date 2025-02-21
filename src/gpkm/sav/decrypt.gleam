@@ -1,8 +1,8 @@
 import gleam/int
 import gleam/list
-import pkm/ser_de
-import sav/blocks
-import utils/bytes.{type Bytes, type Chunks}
+import gpkm/pkm/ser_de
+import gpkm/sav/blocks
+import gpkm/utils/bytes.{type Bytes, type Chunks}
 
 fn tr_unencrypt_chunks(
   bytes_chunks: Chunks,

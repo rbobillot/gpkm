@@ -1,5 +1,5 @@
 import gleam/dict
-import utils/bytes
+import gpkm/utils/bytes
 
 /// Get a lookup table (mainly from pkm_lookup_tables)
 /// converts it to a dictionary,
