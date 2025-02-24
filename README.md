@@ -97,13 +97,14 @@ file
 import gleam/json
 import gpkm/pkm/pkm_builder
 
-// gpkm@1.1.0
+// gpkm@1.1.1
 fn pkm_to_json(pkm: pkm_builder.Pkm) -> String {
   json.object([
     #("pid", json.nullable(pkm.pid, json.int)),
     #("nickname", json.nullable(pkm.nickname, json.string)),
     #("national_pokedex_id", json.nullable(pkm.national_pokedex_id, json.int)),
     #("held_item", json.nullable(pkm.held_item, json.string)),
+    #("origin_game", json.nullable(pkm.origin_game, json.string)),
     #("ot_name", json.nullable(pkm.ot_name, json.string)),
     #("ot_id", json.nullable(pkm.ot_id, json.int)),
     #("ot_secret_id", json.nullable(pkm.ot_secret_id, json.int)),
@@ -179,6 +180,13 @@ fn pkm_to_json(pkm: pkm_builder.Pkm) -> String {
   ])
   |> json.to_string
 }
+
+let _pkm =
+  read_pkm(chimchar_fr_pkm_b64, PkmBits(B64))
+  |> result.map(pkm_to_json)
+  |> result.unwrap("{}")
+  |> io.println
+// -> {"pid":920957501,"nickname":"OUISTICRAM","national_pokedex_id":390,"held_item":"Nothing","origin_game":"Diamond","ot_name":"redmoon","ot_id":51463,"ot_secret_id":50745,"moves":{"move_1":{"name":"Scratch","pp":35},"move_2":{"name":"Leer","pp":30},"move_3":null,"move_4":null},"ability":"Blaze","individual_values":{"hp":1,"atk":3,"def":24,"spe":15,"spa":3,"spd":31},"effort_values":{"hp":0,"atk":0,"def":0,"spe":1,"spa":0,"spd":0},"experience_points":151,"friendship":70,"original_language":"Français (France/Québec)","shiny":false,"level":5,"nature":"Lonely","species":"Chimchar","gender":"Male","hidden_power":{"power_type":"Dragon","base_power":66},"b64_pkm_data":"PbLkNgAAN1KGAQAAB8k5xpcAAABGQgADAAAAAQAAAAAAAAAAAAAAAAoAKwAAAAAAIx4AAAAAAABh4Dc+AAAAAAAAAAAAAAAAOQE/ATMBPQE+ATMBLQE8ASsBNwH//wAKAAAAAAAAAABWAUkBSAFRAVMBUwFSAf//AAAACwEDAABMAAAEBQwAAAAAAAAFABMAEwALAAkACwAKAAoAAAAAAAADCv//////////////////////////////AAD//wAA////////AAD///////9qAf////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="}
 ```
 
 Further documentation can be found at <https://hexdocs.pm/gpkm>.
