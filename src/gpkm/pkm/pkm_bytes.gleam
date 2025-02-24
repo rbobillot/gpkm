@@ -65,9 +65,8 @@ pub type UnencryptedHeaderBytes {
 }
 
 /// UnencryptedPkmBytes record is used to store named pkm data bytes,
-/// according to ProjectPokemon documentation:
-///
-/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+/// according to
+/// [ProjectPokemon documentation](https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/)
 ///
 /// Handling Gen4 PKM structure for now,
 /// but newer generations should be handled later
@@ -215,8 +214,8 @@ pub type UnencryptedPkmBytes {
 /// When the name's length is smaller than the its reserved offset length,
 /// an EOL byte (0xffff) is used to determine the end of a name.
 ///
-/// ```
 /// Example:
+/// ```
 /// - field:   Origin Trainer Name
 /// - offset:  0x68-0x77 (length: 15)
 /// - OT name: "John" (length: 4)

@@ -33,9 +33,8 @@ pub fn get_unencrypted_header(
 }
 
 /// Construct UnencryptedPkmBytes record, storing named pkm data bytes,
-/// according to ProjectPokemon documentation:
-///
-/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+/// according to
+/// [ProjectPokemon documentation](https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/)
 ///
 /// Handling Gen4 PKM structure for now,
 /// but newer generations should be handled later

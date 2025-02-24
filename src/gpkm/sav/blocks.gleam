@@ -108,8 +108,8 @@ fn shuffle_blocks(bs: Blocks, pid: Bytes, ord: Action) -> Blocks {
   shuffle_function(bs, shifted_pv)
 }
 
-/// Shuffle blocks according to the specifies rules:
-/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+/// Shuffle blocks according to the 
+/// [specifies rules](https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/)
 ///
 pub fn shuffle_block_bytes(bs: Bytes, pid: Bytes, ord: Action) -> Bytes {
   bs

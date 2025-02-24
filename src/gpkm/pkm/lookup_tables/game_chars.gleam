@@ -10,6 +10,7 @@
 //// an EOL byte (0xffff) is used to determine the end of a name.
 ////
 //// Example:
+//// ```
 //// - field:   Origin Trainer Name
 //// - offset:  0x68-0x77 (length: 15)
 //// - OT name: "John" (length: 4)
@@ -17,6 +18,7 @@
 ////                                                         ^    ^    ^    ^
 ////                          each letter here is used to visualize the logic but
 ////                          is actually a 2-bytes value (the index of the letter)
+//// ```
 ////
 
 pub const ingame_chars = [

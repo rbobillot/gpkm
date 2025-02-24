@@ -201,8 +201,8 @@ fn get_generation(origin_game: Option(String)) -> Int {
   }
 }
 
-/// Checks shininess according to Gen3+ algorithm:
-/// https://bulbapedia.bulbagarden.net/wiki/Personality_value#Shininess
+/// Checks shininess according to
+/// [Gen3+ algorithm](https://bulbapedia.bulbagarden.net/wiki/Personality_value#Shininess)
 /// ```
 /// S = OT_ID xor OT_SID xor PID{31..16} xor PID{15..0}
 ///   if gen{3..5}: S < 8
@@ -268,8 +268,8 @@ pub fn with_species(pkm: Pkm, national_pokedex_id: Bytes) -> Pkm {
   )
 }
 
-/// Compute hidden_power according to the following documentation:
-/// https://bulbapedia.bulbagarden.net/wiki/Hidden_Power_(move)/Calculation#Generation_III_onward
+/// Compute hidden_power according to the
+/// [following documentation](https://bulbapedia.bulbagarden.net/wiki/Hidden_Power_(move)/Calculation#Generation_III_onward)
 ///
 /// `powr_bits` are computed using a quick trick:
 /// `iv % 4 / 2`, rather than checking if `iv % 4 == 3 || iv % 4 == 2`
