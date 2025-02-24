@@ -1,10 +1,10 @@
 name = "gpkm"
-version = "1.0.0"
+version = "1.1.0"
 
 # Fill out these fields if you intend to generate HTML documentation or publish
 # your project to the Hex package manager.
 #
-description = "A simple deserializer, to read PKM data (Gen4, Gen5)"
+description = "A simple deserializer, to read PKM data (Gen4)"
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "rbobillot", repo = "gpkm" }
 # links = [{ title = "Website", href = "" }]

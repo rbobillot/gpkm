@@ -118,8 +118,8 @@ pub fn shuffle_block_bytes(bs: Bytes, pid: Bytes, ord: Action) -> Bytes {
   |> blocks_as_bytes
 }
 
-/// Construct Blocks record from block bytes
-/// each block is 32 bytes long
+/// Construct Blocks record from block bytes.
+/// Each block is 32 bytes long
 ///
 pub fn bytes_as_blocks(bs: Bytes) -> Blocks {
   let padding = 32

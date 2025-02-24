@@ -1,23 +1,23 @@
-// As the in-game names are composed by non-standard unicode chars
-// they need to be deserialized using a lookup table
-//
-// In-game names (or nicknames), are bytes lists with variable lengths.
-//
-// Each encoded letter is a little endian 16bits (2 bytes) value,
-// used as an index of the corresponding unicode letter, from the lookup table
-//
-// When the name's length is smaller than the its reserved offset length,
-// an EOL byte (0xffff) is used to determine the end of a name.
-//
-// Example:
-// - field:   Origin Trainer Name
-// - offset:  0x68-0x77 (length: 15)
-// - OT name: "John" (length: 4)
-// - bytes:   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 'n', 'h', 'o', 'J'  ]
-//                                                         ^    ^    ^    ^
-//                          each letter here is used to visualize the logic but
-//                          is actually a 2-bytes value (the index of the letter)
-//
+//// As the in-game names are composed by non-standard unicode chars
+//// they need to be deserialized using a lookup table
+////
+//// In-game names (or nicknames), are bytes lists with variable lengths.
+////
+//// Each encoded letter is a little endian 16bits (2 bytes) value,
+//// used as an index of the corresponding unicode letter, from the lookup table
+////
+//// When the name's length is smaller than the its reserved offset length,
+//// an EOL byte (0xffff) is used to determine the end of a name.
+////
+//// Example:
+//// - field:   Origin Trainer Name
+//// - offset:  0x68-0x77 (length: 15)
+//// - OT name: "John" (length: 4)
+//// - bytes:   [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 'n', 'h', 'o', 'J'  ]
+////                                                         ^    ^    ^    ^
+////                          each letter here is used to visualize the logic but
+////                          is actually a 2-bytes value (the index of the letter)
+////
 
 pub const ingame_chars = [
   0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009,

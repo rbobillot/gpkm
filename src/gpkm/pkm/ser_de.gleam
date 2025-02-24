@@ -32,6 +32,14 @@ pub fn get_unencrypted_header(
   )
 }
 
+/// Construct UnencryptedPkmBytes record, storing named pkm data bytes,
+/// according to ProjectPokemon documentation:
+///
+/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+///
+/// Handling Gen4 PKM structure for now,
+/// but newer generations should be handled later
+///
 pub fn get_unencrypted_pkm_bytes(
   pkm_bits: BitArray,
   endian: bytes.Endian,
@@ -125,8 +133,11 @@ pub fn get_unencrypted_pkm_bytes(
 pub fn build_pkm_from_bytes(pbs: pkm_bytes.UnencryptedPkmBytes) -> Pkm {
   pkm.new(pbs.b64_pkm)
   |> pkm.with_pid(pbs.pid)
+  |> pkm.with_nickname(pbs.nickname)
+  |> pkm.with_species(pbs.national_pokedex_id)
   |> pkm.with_national_pokedex_id(pbs.national_pokedex_id)
   |> pkm.with_held_item(pbs.held_item)
+  |> pkm.with_origin_game(pbs.origin_game)
   |> pkm.with_ot_id(pbs.ot_id)
   |> pkm.with_ot_secret_id(pbs.ot_secret_id)
   |> pkm.with_experience_points(pbs.experience_points)
@@ -136,12 +147,10 @@ pub fn build_pkm_from_bytes(pbs: pkm_bytes.UnencryptedPkmBytes) -> Pkm {
   |> pkm.with_effort_values(pbs)
   |> pkm.with_moves(pbs)
   |> pkm.with_individual_values(pbs.individual_values)
-  |> pkm.with_nickname(pbs.nickname)
   |> pkm.with_ot_name(pbs.ot_name)
   |> pkm.with_shiny(pbs.pid, pbs.ot_id, pbs.ot_secret_id)
   |> pkm.with_level(pbs.level)
   |> pkm.with_nature(pbs.pid)
-  |> pkm.with_species(pbs.national_pokedex_id)
   |> pkm.with_gender(pbs.encounter_main_info)
   |> pkm.with_hidden_power()
 }
@@ -186,6 +195,10 @@ pub fn as_binary(
   }
 }
 
+/// Sanitize read data by limiting its size
+/// - 236 if pkm size >= 236
+/// - 136 if pkm size >= 136
+///
 pub fn slice_bits(
   bits_read: Result(BitArray, Nil),
   dt: EncryptedDataType,
@@ -194,11 +207,26 @@ pub fn slice_bits(
     Ok(bs), Ok(size) ->
       bit_array.slice(bs, 0, size)
       |> result.map_error(fn(_) { InvalidSize(dt) })
-    _, Error(_) -> Error(InvalidSize(dt))
     Error(_), _ -> Error(ReadError(dt))
+    _, Error(_) -> Error(InvalidSize(dt))
   }
 }
 
+/// Read and deserialize PKM data depending on data type
+/// ```gleam
+///  read_pkm(pkm_path, PkmFile(Bin))
+///  // read simple .pkm file (where content is binary data)
+///
+///  read_pkm(pkm_path, PkmFile(B64))
+///  // read base64 .pkm file (where content is a base64 pkm string)
+///
+///  read_pkm(pkm_bitarray, PkmBits(Bin))
+///  // read pkm bitarray
+///
+///  read_pkm(pkm_b64_str, PkmBits(B64))
+///  // read base64 pkm string (convert it to binary data)
+/// ```
+///
 pub fn read_pkm(pkm_data: String, dt: EncryptedDataType) -> Result(Pkm, Errors) {
   let pkm_bitarray = case pkm_data, dt {
     b64, PkmBits(B64) -> slice_bits(b64 |> deserialize_b64, PkmFile(B64))

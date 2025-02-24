@@ -29,6 +29,11 @@ fn unencrypt_chunks_as_bytes(bytes_chunks: Chunks, rand_seed: Bytes) -> Bytes {
   |> list.flat_map(bytes.i16_to_i8_bytes(_, bytes.LittleEndian))
 }
 
+/// Decrypt pkm data when it is encrypted using .sav format.
+/// According to ProjectPokemon documentation:
+///
+/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+///
 pub fn decrypt_pkm(pkm_bits: BitArray) -> Bytes {
   let pkm_bytes = bytes.bits_to_bytes(pkm_bits)
   let header = ser_de.get_unencrypted_header(pkm_bytes, bytes.LittleEndian)

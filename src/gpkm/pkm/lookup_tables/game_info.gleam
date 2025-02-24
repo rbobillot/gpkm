@@ -1,7 +1,7 @@
-// In the PKM file, some of the Game data (language, game) are single-bytes values.
-//
-// This file is a collection of lookup tables, for each game datum
-//
+//// In the PKM file, some of the Game data (language, game) are single-bytes values.
+////
+//// This file is a collection of lookup tables, for each game datum
+////
 
 pub const language = [
   #(0x1, "日本語 (Japan)"),

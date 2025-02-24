@@ -5,22 +5,44 @@ import gleam/option.{type Option, None, Some}
 import gpkm/pkm/lookup_tables/game_info
 import gpkm/pkm/lookup_tables/lookup
 import gpkm/pkm/lookup_tables/pokemon_info
-import gpkm/pkm/pkm_bytes
+import gpkm/pkm/pkm_bytes.{
+  type EffortValues, type HiddenPower, type IndividualValues, type Moves,
+}
 import gpkm/utils/bytes.{type Bytes}
 
+/// Pkm record, containing the most valuable info about a Pokemon:
+/// pid, nickname, species, moves, ivs, evs, ot id/sid, shininess...
+///
+/// It also contains the original pkm bytes as a base64 string
+///
+/// Each Pkm parameter is an Option,
+/// to construct the record using the builder pattern
+///
+/// ```gleam
+/// let b64_pkm_data = ""
+/// let pid_bytes = [42, 21, 12, 24]
+/// let level_bytes = [42]
+///
+/// pkm_builder.new(b64_pkm_data)
+/// |> with_pid(pid_bytes)
+/// |> with_level(level_bytes)
+/// // -> Pkm(pid: Some(42211224), level: 42, nickname: None, ..., b64_pkm_data: "")
+/// ```
+///
 pub type Pkm {
   Pkm(
     pid: Option(Int),
     nickname: Option(String),
     national_pokedex_id: Option(Int),
     held_item: Option(String),
+    origin_game: Option(String),
     ot_name: Option(String),
     ot_id: Option(Int),
     ot_secret_id: Option(Int),
-    moves: Option(pkm_bytes.Moves),
+    moves: Option(Moves),
     ability: Option(String),
-    individual_values: Option(pkm_bytes.IndividualValues),
-    effort_values: Option(pkm_bytes.EffortValues),
+    individual_values: Option(IndividualValues),
+    effort_values: Option(EffortValues),
     experience_points: Option(Int),
     friendship: Option(Int),
     original_language: Option(String),
@@ -29,17 +51,22 @@ pub type Pkm {
     nature: Option(String),
     species: Option(String),
     gender: Option(String),
-    hidden_power: Option(pkm_bytes.HiddenPower),
+    hidden_power: Option(HiddenPower),
     b64_pkm_data: String,
   )
 }
 
+/// Construct the Pkm using the builder pattern,
+/// with a mandatory pattern: the pkm data as a base64 string,
+/// which will be used to serialize the Pkm as pkm binary
+///
 pub fn new(b64_pkm_data: String) -> Pkm {
   Pkm(
     pid: None,
     nickname: None,
     national_pokedex_id: None,
     held_item: None,
+    origin_game: None,
     ot_name: None,
     ot_id: None,
     ot_secret_id: None,
@@ -82,6 +109,23 @@ pub fn with_held_item(pkm: Pkm, held_item: Bytes) -> Pkm {
   )
 }
 
+fn get_origin_game(origin_game: Int) -> Option(String) {
+  game_info.game
+  |> dict.from_list
+  |> dict.get(origin_game)
+  |> option.from_result
+}
+
+/// This Pkm `origin_game` parameter,
+/// needs to be set before the `shiny` parameter.
+///
+/// The origin_game will be used to determine shininess,
+/// as shiny odds have been increased since Gen6
+///
+pub fn with_origin_game(pkm: Pkm, origin_game: Bytes) -> Pkm {
+  Pkm(..pkm, origin_game: get_origin_game(bytes.to_int(origin_game)))
+}
+
 pub fn with_ot_name(pkm: Pkm, ot_name: Bytes) -> Pkm {
   Pkm(..pkm, ot_name: Some(pkm_bytes.get_name(ot_name)))
 }
@@ -96,13 +140,15 @@ pub fn with_ot_secret_id(pkm: Pkm, ot_secret_id: Bytes) -> Pkm {
 
 /// Uses the whole UnencryptedPkmBytes to build Pkm with `moves`
 ///
-/// As each move/pp is a field of UnencryptedPkmBytes
+/// As each move/pp is a field of UnencryptedPkmBytes,
 /// each move/pp will be extracted from the `get_moves` function
 ///
 pub fn with_moves(pkm: Pkm, bs: pkm_bytes.UnencryptedPkmBytes) -> Pkm {
   Pkm(..pkm, moves: Some(pkm_bytes.get_moves(bs)))
 }
 
+/// Gets the ability from the corresponding lookup table
+///
 pub fn with_ability(pkm: Pkm, ability: Bytes) -> Pkm {
   Pkm(
     ..pkm,
@@ -117,7 +163,7 @@ pub fn with_individual_values(pkm: Pkm, individual_values: Bytes) -> Pkm {
 
 /// Uses the whole UnencryptedPkmBytes to build Pkm with effort values
 ///
-/// As each effort_value is a field of UnencryptedPkmBytes
+/// As each effort_value is a field of UnencryptedPkmBytes,
 /// each effort_value will be extracted from the `get_evs` function
 ///
 pub fn with_effort_values(pkm: Pkm, bs: pkm_bytes.UnencryptedPkmBytes) -> Pkm {
@@ -132,6 +178,8 @@ pub fn with_friendship(pkm: Pkm, friendship: Bytes) -> Pkm {
   Pkm(..pkm, friendship: Some(bytes.to_int(friendship)))
 }
 
+/// Gets the original language from the corresponding lookup table
+///
 pub fn with_original_language(pkm: Pkm, original_language: Bytes) -> Pkm {
   Pkm(
     ..pkm,
@@ -142,22 +190,46 @@ pub fn with_original_language(pkm: Pkm, original_language: Bytes) -> Pkm {
   )
 }
 
-pub fn is_shiny(pid: Int, ot_id: Int, secret_id: Int) -> Bool {
+fn get_generation(origin_game: Option(String)) -> Int {
+  case option.unwrap(origin_game, "") {
+    "Sapphire" | "Ruby" | "Emerald" -> 3
+    "Colosseum/XD" | "Fire Red" | "Leaf Green" -> 3
+    "Diamond" | "Pearl" | "Platinum" | "Heart Gold" | "Soul Silver" -> 4
+    "White" | "Black" | "White 2" | "Black 2" -> 5
+    "X" | "Y" -> 6
+    _ -> 0
+  }
+}
+
+/// Checks shininess according to Gen3+ algorithm:
+/// https://bulbapedia.bulbagarden.net/wiki/Personality_value#Shininess
+/// ```
+/// S = OT_ID xor OT_SID xor PID{31..16} xor PID{15..0}
+///   if gen{3..5}: S < 8
+///   if gen{6.. }: S < 16
+/// ```
+///
+pub fn is_shiny(gen: Int, pid: Int, ot_id: Int, secret_id: Int) -> Bool {
   let pid_upper16 = pid |> int.bitwise_shift_right(16)
   let pid_lower16 = pid |> int.bitwise_and(0xffff)
 
-  let xored_ot_id = int.bitwise_exclusive_or(ot_id, secret_id)
-  let xored_pk_id = int.bitwise_exclusive_or(pid_upper16, pid_lower16)
+  let xored =
+    ot_id
+    |> int.bitwise_exclusive_or(secret_id)
+    |> int.bitwise_exclusive_or(pid_upper16)
+    |> int.bitwise_exclusive_or(pid_lower16)
 
-  let xored_ids = int.bitwise_exclusive_or(xored_ot_id, xored_pk_id)
-
-  xored_ids < 8
+  case gen {
+    gen if gen <= 5 -> xored < 8
+    _gen6_and_above -> xored < 16
+  }
 }
 
 pub fn with_shiny(pkm: Pkm, pid: Bytes, ot_id: Bytes, secret_id: Bytes) -> Pkm {
   Pkm(
     ..pkm,
     shiny: Some(is_shiny(
+      get_generation(pkm.origin_game),
       bytes.to_int(pid),
       bytes.to_int(ot_id),
       bytes.to_int(secret_id),
@@ -169,6 +241,8 @@ pub fn with_level(pkm: Pkm, level: Bytes) -> Pkm {
   Pkm(..pkm, level: Some(bytes.to_int(level)))
 }
 
+/// Gets the nature from the corresponding lookup table
+///
 pub fn get_nature(pid: Int) -> Result(String, Nil) {
   pokemon_info.natures
   |> dict.from_list
@@ -179,6 +253,8 @@ pub fn with_nature(pkm: Pkm, pid: Bytes) -> Pkm {
   Pkm(..pkm, nature: get_nature(bytes.to_int(pid)) |> option.from_result)
 }
 
+/// Gets the species from the corresponding lookup table
+///
 pub fn get_species(national_pokedex_id: Int) -> Result(String, Nil) {
   pokemon_info.species
   |> dict.from_list

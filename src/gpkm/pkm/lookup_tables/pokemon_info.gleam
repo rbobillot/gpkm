@@ -1,8 +1,8 @@
-// In the PKM file, some of the Pokemon data (nature, abilitiy, moves...)
-// are some single-bytes values.
-//
-// This file is a collection of lookup tables, for each pokemon datum
-//
+//// In the PKM file, some of the Pokemon data (nature, abilitiy, moves...)
+//// are some single-bytes values.
+////
+//// This file is a collection of lookup tables, for each pokemon datum
+////
 
 pub const hidden_power_types = [
   #(0, "Fighting"),

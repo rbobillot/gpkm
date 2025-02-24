@@ -13,7 +13,7 @@ gleam add gpkm
 
 A simple deserializer, to read PKM data (Gen4, Gen5):
 
-- `.pkm`, `.pk4`, `.pk5`, `.sav` (experimental) files
+- `.pkm`, `.pk4`, `.pk5` (soon), `.sav` (experimental) files
 - `base64` pkm strings (.pkm bytes as base64)
 - `base64` pkm files
 
@@ -87,7 +87,99 @@ pub fn main() {
 }
 ```
 
-More examples in the [ser_de_test.gleam](./test/pkm/ser_de_test.gleam) file
+More examples in the
+[ser_de_test.gleam](https://github.com/rbobillot/gpkm/blob/main/test/gpkm/pkm/ser_de_test.gleam)
+file
+
+## Serialize data (JSON is the way, using gleam_json)
+
+```gleam
+import gleam/json
+import gpkm/pkm/pkm_builder
+
+// gpkm@1.1.0
+fn pkm_to_json(pkm: pkm_builder.Pkm) -> String {
+  json.object([
+    #("pid", json.nullable(pkm.pid, json.int)),
+    #("nickname", json.nullable(pkm.nickname, json.string)),
+    #("national_pokedex_id", json.nullable(pkm.national_pokedex_id, json.int)),
+    #("held_item", json.nullable(pkm.held_item, json.string)),
+    #("ot_name", json.nullable(pkm.ot_name, json.string)),
+    #("ot_id", json.nullable(pkm.ot_id, json.int)),
+    #("ot_secret_id", json.nullable(pkm.ot_secret_id, json.int)),
+    #(
+      "moves",
+      json.nullable(pkm.moves, fn(moves) {
+        json.object(
+          [
+            #("move_1", moves.move_1),
+            #("move_2", moves.move_2),
+            #("move_3", moves.move_3),
+            #("move_4", moves.move_4),
+          ]
+          |> list.map(fn(move_n) {
+            #(
+              move_n.0,
+              json.nullable(move_n.1, fn(mv) {
+                json.object([
+                  #("name", json.string(mv.name)),
+                  #("pp", json.int(mv.pp)),
+                ])
+              }),
+            )
+          }),
+        )
+      }),
+    ),
+    #("ability", json.nullable(pkm.ability, json.string)),
+    #(
+      "individual_values",
+      json.nullable(pkm.individual_values, fn(iv) {
+        json.object([
+          #("hp", json.int(iv.hp)),
+          #("atk", json.int(iv.atk)),
+          #("def", json.int(iv.def)),
+          #("spe", json.int(iv.spe)),
+          #("spa", json.int(iv.spa)),
+          #("spd", json.int(iv.spd)),
+        ])
+      }),
+    ),
+    #(
+      "effort_values",
+      json.nullable(pkm.effort_values, fn(ev) {
+        json.object([
+          #("hp", json.int(ev.hp)),
+          #("atk", json.int(ev.atk)),
+          #("def", json.int(ev.def)),
+          #("spe", json.int(ev.spe)),
+          #("spa", json.int(ev.spa)),
+          #("spd", json.int(ev.spd)),
+        ])
+      }),
+    ),
+    #("experience_points", json.nullable(pkm.experience_points, json.int)),
+    #("friendship", json.nullable(pkm.friendship, json.int)),
+    #("original_language", json.nullable(pkm.original_language, json.string)),
+    #("shiny", json.nullable(pkm.shiny, json.bool)),
+    #("level", json.nullable(pkm.level, json.int)),
+    #("nature", json.nullable(pkm.nature, json.string)),
+    #("species", json.nullable(pkm.species, json.string)),
+    #("gender", json.nullable(pkm.gender, json.string)),
+    #(
+      "hidden_power",
+      json.nullable(pkm.hidden_power, fn(hp) {
+        json.object([
+          #("power_type", json.string(hp.power_type)),
+          #("base_power", json.int(hp.base_power)),
+        ])
+      }),
+    ),
+    #("b64_pkm_data", json.string(pkm.b64_pkm_data)),
+  ])
+  |> json.to_string
+}
+```
 
 Further documentation can be found at <https://hexdocs.pm/gpkm>.
 

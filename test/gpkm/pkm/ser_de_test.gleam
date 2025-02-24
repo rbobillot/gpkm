@@ -1,5 +1,5 @@
 import gleam/bit_array
-import gleam/option.{Some}
+import gleam/option.{None, Some}
 import gleeunit/should
 import gpkm/pkm/pkm_builder
 import gpkm/pkm/pkm_bytes.{
@@ -20,29 +20,30 @@ const chimchar_fr_pkm_b64 = "
 "
 
 const chimchar_fr_pkm = pkm_builder.Pkm(
-  Some(920_957_501),
-  Some("OUISTICRAM"),
-  Some(390),
-  Some("Nothing"),
-  Some("redmoon"),
-  Some(51_463),
-  Some(50_745),
-  Some(
-    Moves(Ok(Move("Scratch", 35)), Ok(Move("Leer", 30)), Error(Nil), Error(Nil)),
+  pid: Some(920_957_501),
+  nickname: Some("OUISTICRAM"),
+  national_pokedex_id: Some(390),
+  held_item: Some("Nothing"),
+  origin_game: Some("Diamond"),
+  ot_name: Some("redmoon"),
+  ot_id: Some(51_463),
+  ot_secret_id: Some(50_745),
+  moves: Some(
+    Moves(Some(Move("Scratch", 35)), Some(Move("Leer", 30)), None, None),
   ),
-  Some("Blaze"),
-  Some(IndividualValues(1, 3, 24, 15, 3, 31)),
-  Some(EffortValues(0, 0, 0, 1, 0, 0)),
-  Some(151),
-  Some(70),
-  Some("Français (France/Québec)"),
-  Some(False),
-  Some(5),
-  Some("Lonely"),
-  Some("Chimchar"),
-  Some("Male"),
-  Some(HiddenPower("Dragon", 66)),
-  "PbLkNgAAN1KGAQAAB8k5xpcAAABGQgADAAAAAQAAAAAAAAAAAAAAAAoAKwAAAAAAIx4AAAAAAABh4Dc+AAAAAAAAAAAAAAAAOQE/ATMBPQE+ATMBLQE8ASsBNwH//wAKAAAAAAAAAABWAUkBSAFRAVMBUwFSAf//AAAACwEDAABMAAAEBQwAAAAAAAAFABMAEwALAAkACwAKAAoAAAAAAAADCv//////////////////////////////AAD//wAA////////AAD///////9qAf////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+  ability: Some("Blaze"),
+  individual_values: Some(IndividualValues(1, 3, 24, 15, 3, 31)),
+  effort_values: Some(EffortValues(0, 0, 0, 1, 0, 0)),
+  experience_points: Some(151),
+  friendship: Some(70),
+  original_language: Some("Français (France/Québec)"),
+  shiny: Some(False),
+  level: Some(5),
+  nature: Some("Lonely"),
+  species: Some("Chimchar"),
+  gender: Some("Male"),
+  hidden_power: Some(HiddenPower("Dragon", 66)),
+  b64_pkm_data: "PbLkNgAAN1KGAQAAB8k5xpcAAABGQgADAAAAAQAAAAAAAAAAAAAAAAoAKwAAAAAAIx4AAAAAAABh4Dc+AAAAAAAAAAAAAAAAOQE/ATMBPQE+ATMBLQE8ASsBNwH//wAKAAAAAAAAAABWAUkBSAFRAVMBUwFSAf//AAAACwEDAABMAAAEBQwAAAAAAAAFABMAEwALAAkACwAKAAoAAAAAAAADCv//////////////////////////////AAD//wAA////////AAD///////9qAf////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
 )
 
 pub fn deserialize_b64_test() {
@@ -77,4 +78,12 @@ pub fn read_pkm_test() {
   chimchar_fr_pkm_file_path_b64
   |> ser_de.read_pkm(pkm_bytes.PkmFile(pkm_bytes.B64))
   |> should.equal(Ok(chimchar_fr_pkm))
+
+  "unknown_path"
+  |> ser_de.read_pkm(pkm_bytes.PkmFile(pkm_bytes.Bin))
+  |> should.equal(Error(ser_de.ReadError(pkm_bytes.PkmFile(pkm_bytes.Bin))))
+
+  chimchar_fr_pkm_file_path
+  |> ser_de.read_pkm(pkm_bytes.PkmFile(pkm_bytes.B64))
+  |> should.equal(Error(ser_de.ReadError(pkm_bytes.PkmFile(pkm_bytes.B64))))
 }

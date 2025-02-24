@@ -1,6 +1,7 @@
 import gleam/dict
 import gleam/int
 import gleam/list
+import gleam/option.{type Option}
 import gleam/result
 import gleam/string
 import gpkm/pkm/lookup_tables/game_chars
@@ -8,11 +9,23 @@ import gpkm/pkm/lookup_tables/lookup
 import gpkm/pkm/lookup_tables/pokemon_info
 import gpkm/utils/bytes.{type Bytes}
 
+/// Encoding used to serialize pkm data
+/// - binary data (readable from a BitArray)
+/// - base64 data (converting base64 string to a BitArray)
+///
 pub type Encoding {
   Bin
   B64
 }
 
+/// Types used to read pkm data (wether is encoded with base64 or simple binary)
+/// - *File: read pkm data from .pkm file
+/// - *Bits: read pkm data from BitArray
+///
+/// - SavPkm*: encrypted pkm data (that will need to be decrypted first)
+/// - Sav*:    encrypted saved game data (containing multiple pkm BitArrays)
+/// - Pkm*:    unencrypted pkm data
+///
 pub type EncryptedDataType {
   PkmBits(Encoding)
   SavBits(Encoding)
@@ -36,10 +49,10 @@ pub type Move {
 
 pub type Moves {
   Moves(
-    move_1: Result(Move, Nil),
-    move_2: Result(Move, Nil),
-    move_3: Result(Move, Nil),
-    move_4: Result(Move, Nil),
+    move_1: Option(Move),
+    move_2: Option(Move),
+    move_3: Option(Move),
+    move_4: Option(Move),
   )
 }
 
@@ -51,6 +64,14 @@ pub type UnencryptedHeaderBytes {
   UnencryptedHeaderBytes(pid: Bytes, tmp: Bytes, checksum: Bytes)
 }
 
+/// UnencryptedPkmBytes record is used to store named pkm data bytes,
+/// according to ProjectPokemon documentation:
+///
+/// https://projectpokemon.org/home/docs/gen-4/pkm-structure-r65/
+///
+/// Handling Gen4 PKM structure for now,
+/// but newer generations should be handled later
+///
 pub type UnencryptedPkmBytes {
   UnencryptedPkmBytes(
     //
@@ -183,7 +204,7 @@ pub type UnencryptedPkmBytes {
   )
 }
 
-/// As the in-game names are composed by non-standard unicode chars
+/// As the in-game names are composed by non-standard unicode chars,
 /// they need to be deserialized using a lookup table
 ///
 /// In-game names (or nicknames), are little endian bytes lists with variable lengths.
@@ -257,7 +278,7 @@ pub fn get_shifted_iv(ivs: Int, by: Int) -> Int {
   |> int.bitwise_and(iv_max_value_mask)
 }
 
-/// Extract each IV from a 32bits (4 bytes) Int
+/// Extract each IV from a 32bits (4 bytes) Int.
 /// More info in the UnencryptedPkmBytes type definition
 ///
 /// The 32bits Int also hold 2 flags (isEgg, isNicknamed),
@@ -278,13 +299,15 @@ pub fn get_ivs(data: Bytes) -> IndividualValues {
 
 /// Get move names from the 'moves' lookup table
 ///
-pub fn lookup_move(move_id: Bytes, move_pp: Bytes) -> Result(Move, Nil) {
+pub fn lookup_move(move_id: Bytes, move_pp: Bytes) -> option.Option(Move) {
   move_id
   |> lookup.lookup_ingame_str(pokemon_info.moves)
   |> result.map(fn(name) { Move(name, bytes.to_int(move_pp)) })
+  |> option.from_result
 }
 
-/// Get moves and their pps
+/// Get moves and their pps.
+///
 /// Each move/pp combo will be a Result(Move, Nil),
 /// as a Pokemon might not always have learned 4 moves
 ///
